@@ -1,0 +1,82 @@
+<link rel="preconnect" href="https://fonts.gstatic.com">
+<link href="https://fonts.googleapis.com/css2?family=Rubik&display=swap" rel="stylesheet">
+
+<style>
+    * {
+        font-family: "Rubik", "sans-serif";
+    }
+
+    div {
+        text-align: center;
+        margin-top: 10px;
+    }
+
+    h3 {
+        color: red;
+        font-size: 20pt;
+    }
+
+    p {
+        font-size: 24pt;
+    }
+    body{
+        background-color: aliceblue;
+    }
+
+    table, th, td {
+     /* border: 1px solid black; */
+     /* background-color: lightgrey; */
+     padding:5px;
+
+    }
+</style>
+
+<script type='text/javascript'>
+    async function searchTFIDF() {
+        console.log('searching from TFIDF')
+        let content = document.getElementById("searchtext").value;
+
+        console.log(`Content: ${JSON.stringify({'query': content})}`)
+        let response = await fetch('/search', {
+            method: 'POST',
+            body: JSON.stringify({'query': content}),
+            headers: new Headers({
+                "content-type": "application/json"
+            })
+        });
+        let json_response = await response.json();
+        // let list_query = '<div><table style="border-width: 1px;alignment: center;margin-top: 20px;width: 100%;"><tr><th>Id</th><th>DocId</th><th>URL</th><th>Score</th></tr>';
+        let list_query = '<div style="margin-top: 60px"><table style="width: 100%;">';
+
+        const res = JSON.parse(JSON.stringify(json_response));
+
+        Object.entries(res['message']).forEach((entry) => {
+            // DOC: entry = index, [filename, url, score]
+            let index = entry[0];
+            let index_count = parseInt(index) + 1;
+            let filename = entry[1][0];
+            let url = entry[1][1];
+            // let score = entry[1][2];
+
+            // list_query += `<tr><td>${index}</td><td>${filename}</td><td><a href=${url} target="_blank"> ${url}</a></td><td>${score}</td></tr>`;
+            list_query += `<tr><td>${index_count}</td><td><a href=${url} target="_blank"> ${url}</a></td></tr>`;
+
+        });
+        list_query += '</table></div>'
+        document.getElementById("result").innerHTML = "<span style='color: yellow; font-size: 15px'>" + list_query + "</span>";
+
+        return json_response;
+    }
+</script>
+<div>
+    <h3 style="margin-top:100px">Retrieval Engine for UoM</h3>
+<div style="padding:5px">
+    <span style="padding:10px; font-size:medium">Search: </span><input type="text" placeholder="Input your words" id="searchtext" style="padding:10px; width:600px"/>
+    
+        <span class="title" id="message"></span>
+        <input type="button" value="Search" id="searchQuery" onclick="searchTFIDF()" style="padding:10px"/>
+        <span class="content" id="result"></span>
+    </div>
+    
+
+</div>
